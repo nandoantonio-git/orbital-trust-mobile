@@ -1,6 +1,7 @@
 .devcontainer/
 .env
 .expo/
+mobile/.expo/
 node_modules/
 scripts/
 skills/
