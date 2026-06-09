@@ -31,22 +31,26 @@ export default function LoginScreen(): JSX.Element {
 
     setSubmitting(true);
     setError('');
-
     try {
-      const success = await login(email, password);
+  const AsyncStorage = (await import('@react-native-async-storage/async-storage')).default;
+  const session = await AsyncStorage.getItem('@orbital_trust/session');
+  console.log('[LoginScreen] sessão antes do login:', session);
 
-      if (!success) {
-        setError('Email ou senha inválidos.');
-        return;
-      }
+  const success = await login(email, password);
 
-      navigation.reset({
-        index: 0,
-        routes: [{ name: 'Dashboard' }],
-      });
-    } finally {
-      setSubmitting(false);
-    }
+  if (!success) {
+    setError('Email ou senha inválidos.');
+    return;
+  }
+
+  navigation.reset({
+    index: 0,
+    routes: [{ name: 'Dashboard' }],
+  });
+} finally {
+  setSubmitting(false);
+}
+   
   };
 
   return (

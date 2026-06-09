@@ -17,8 +17,8 @@ const linking: LinkingOptions<RootStackParamList> = {
   prefixes: [],
   config: {
     screens: {
-      Login: 'login',
-      Dashboard: '',
+      Login: '',
+      Dashboard: 'dashboard',
       AlertDetail: 'alerts/:alertId',
       History: 'history',
       Settings: 'settings',
