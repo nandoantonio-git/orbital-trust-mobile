@@ -1,3 +1,4 @@
+.devcontainer/
 .env
 .expo/
 node_modules/
