@@ -1,3 +1,5 @@
 .env
 .expo/
 node_modules/
+scripts/
+skills/
