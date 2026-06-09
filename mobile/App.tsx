@@ -1,14 +1,16 @@
-import React from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import type { LinkingOptions } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
+import LoginScreen from './src/screens/LoginScreen';
 import DashboardScreen from './src/screens/DashboardScreen';
 import AlertDetailScreen from './src/screens/AlertDetailScreen';
 import HistoryScreen from './src/screens/HistoryScreen';
 import SettingsScreen from './src/screens/SettingsScreen';
 import AboutScreen from './src/screens/AboutScreen';
-import type { RootStackParamList } from './src/screens/DashboardScreen';
+import { isAuthenticated } from './src/services/authService';
+import type { RootStackParamList } from './src/types/navigation';
 
 const Stack = createStackNavigator<RootStackParamList>();
 
@@ -16,6 +18,7 @@ const linking: LinkingOptions<RootStackParamList> = {
   prefixes: [], // prefixes not used on web
   config: {
     screens: {
+      Login: 'login',
       Dashboard: '',
       AlertDetail: 'alerts/:alertId',
       History: 'history',
@@ -26,9 +29,46 @@ const linking: LinkingOptions<RootStackParamList> = {
 };
 
 export default function App(): JSX.Element {
+  const [loading, setLoading] = useState(true);
+  const [initialRouteName, setInitialRouteName] =
+    useState<keyof RootStackParamList>('Login');
+
+  useEffect(() => {
+    let active = true;
+
+    Promise.all([
+      isAuthenticated(),
+      new Promise((resolve) => setTimeout(resolve, 1000)),
+    ])
+      .then(([authenticated]) => {
+        if (active) setInitialRouteName(authenticated ? 'Dashboard' : 'Login');
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  if (loading) {
+    return (
+      <View style={styles.bootContainer}>
+        <ActivityIndicator size="large" color="#00d4ff" />
+        <Text style={styles.bootText}>Orbital Trust</Text>
+      </View>
+    );
+  }
+
   return (
     <NavigationContainer linking={linking}>
-      <Stack.Navigator initialRouteName="Dashboard">
+      <Stack.Navigator initialRouteName="Login">
+        <Stack.Screen
+          name="Login"
+          component={LoginScreen}
+          options={{ headerShown: false }}
+        />
         <Stack.Screen
           name="Dashboard"
           component={DashboardScreen}
@@ -84,6 +124,18 @@ export default function App(): JSX.Element {
 }
 
 const styles = StyleSheet.create({
+  bootContainer: {
+    alignItems: 'center',
+    backgroundColor: '#0a0a0a',
+    flex: 1,
+    gap: 12,
+    justifyContent: 'center',
+  },
+  bootText: {
+    color: '#00d4ff',
+    fontSize: 22,
+    fontWeight: '800',
+  },
   headerActions: {
     flexDirection: 'row',
     marginRight: 8,
